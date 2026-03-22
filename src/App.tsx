@@ -1,37 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavBar } from './components/NavBar';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
+import DEFAULT_MARKDOWN from './assets/default.md?raw';
 import './App.css';
-
-const DEFAULT_MARKDOWN = `# Welcome to Markdown Viewer
-
-Start typing in the editor on the left.
-
-## Features
-- **GFM support** (tables, task lists)
-- **Math equations** (\`remark-math\` & \`rehype-katex\`)
-- **Diagrams** (Mermaid)
-- **Syntax Highlighting**
-- Perfect print fidelity
-
-\`\`\`javascript
-function hello() {
-  console.log("Hello Output");
-}
-\`\`\`
-
-$$
-E = mc^2
-$$
-
-\`\`\`mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-\`\`\`
-`;
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
