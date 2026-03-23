@@ -14,7 +14,9 @@ export function NavBar({ theme, toggleTheme, viewMode, setViewMode, onPrint }: N
   return (
     <nav className="navbar no-print">
       <div className="navbar-left">
-        <h1 className="navbar-title">Markdown Viewer</h1>
+        <h2 className="navbar-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem', fontWeight: 600 }}>
+          <FileText size={16} /> default.md
+        </h2>
       </div>
       <div className="navbar-center">
         <div className="view-toggle">

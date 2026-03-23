@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavBar } from './components/NavBar';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
+import { FileText } from 'lucide-react';
 import DEFAULT_MARKDOWN from './assets/default.md?raw';
 import './App.css';
 
@@ -13,7 +14,7 @@ function App() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const blockScrollSync = useRef<'editor' | 'preview' | null>(null);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -25,6 +26,13 @@ function App() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const clearSyncBlock = () => {
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      blockScrollSync.current = null;
+    }, 50);
   };
 
   const handleEditorScroll = () => {
@@ -40,10 +48,7 @@ function App() {
       preview.scrollTop = percentage * (preview.scrollHeight - preview.clientHeight);
     }
     
-    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    scrollTimeout.current = setTimeout(() => {
-      blockScrollSync.current = null;
-    }, 50);
+    clearSyncBlock();
   };
 
   const handlePreviewScroll = () => {
@@ -59,43 +64,59 @@ function App() {
       editor.scrollTop = percentage * (editor.scrollHeight - editor.clientHeight);
     }
     
-    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    scrollTimeout.current = setTimeout(() => {
-      blockScrollSync.current = null;
-    }, 50);
+    clearSyncBlock();
   };
 
   return (
     <div className="app-container">
-      <NavBar 
-        theme={theme} 
-        toggleTheme={toggleTheme} 
-        viewMode={viewMode} 
-        setViewMode={setViewMode} 
-        onPrint={handlePrint} 
-      />
-      
-      <main className={`main-content mode-${viewMode}`}>
-        {viewMode === 'split' && (
-          <div className="editor-pane no-print">
-            <textarea
-              ref={editorRef}
-              className="editor-textarea"
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              onScroll={handleEditorScroll}
-              placeholder="Type markdown here..."
-              spellCheck="false"
-            />
-          </div>
-        )}
-        
-        <div className="preview-pane" ref={previewRef} onScroll={handlePreviewScroll}>
-          <div className="preview-container">
-            <MarkdownRenderer content={markdown} theme={theme} />
+      <aside className="sidebar no-print">
+        <div className="sidebar-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 32" height="28">
+            <rect x="0" y="0" width="32" height="32" rx="8" fill="var(--accent-color)" />
+            <path d="M6 24V8h5l5 6.5 5-6.5h5v16h-4V14.5l-6 6.5-6-6.5v9.5z" fill="var(--bg-primary)" />
+            <text x="42" y="22" fontFamily="var(--font-sans)" fontSize="18" fontWeight="800" fill="var(--text-primary)" letterSpacing="-0.5">
+              Markdown Viewer
+            </text>
+          </svg>
+        </div>
+        <div className="sidebar-content">
+          <div className="file-item active">
+            <FileText size={16} /> default.md
           </div>
         </div>
-      </main>
+      </aside>
+
+      <div className="workspace">
+        <NavBar 
+          theme={theme} 
+          toggleTheme={toggleTheme} 
+          viewMode={viewMode} 
+          setViewMode={setViewMode} 
+          onPrint={handlePrint} 
+        />
+        
+        <main className={`main-content mode-${viewMode}`}>
+          {viewMode === 'split' && (
+            <div className="editor-pane no-print">
+              <textarea
+                ref={editorRef}
+                className="editor-textarea"
+                value={markdown}
+                onChange={(e) => setMarkdown(e.target.value)}
+                onScroll={handleEditorScroll}
+                placeholder="Type markdown here..."
+                spellCheck="false"
+              />
+            </div>
+          )}
+          
+          <div className="preview-pane" ref={previewRef} onScroll={handlePreviewScroll}>
+            <div className="preview-container">
+              <MarkdownRenderer content={markdown} theme={theme} />
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

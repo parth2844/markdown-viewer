@@ -1,40 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nord0: #2e3440;
+  --color-nord1: #3b4252;
+  --color-nord2: #434c5e;
+  --color-nord3: #4c566a;
+  --color-nord4: #d8dee9;
+  --color-nord5: #e5e9f0;
+  --color-nord6: #eceff4;
+  --color-nord7: #8fbcbb;
+  --color-nord8: #88c0d0;
+  --color-nord9: #81a1c1;
+  --color-nord10: #5e81ac;
+  --color-nord11: #bf616a;
+  --color-nord12: #d08770;
+  --color-nord13: #ebcb8b;
+  --color-nord14: #a3be8c;
+  --color-nord15: #b48ead;
+}
+
 :root {
-  /* Light Theme Variables */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f6f8fa;
-  --bg-tertiary: #f3f4f6;
-  --text-primary: #1f2328;
-  --text-secondary: #656d76;
-  --border-color: #d0d7de;
-  --accent-color: #0969da;
-  --accent-hover: #0349b4;
-  --code-bg: #f6f8fa;
-  --header-bg: #f6f8fa;
-  --header-border: #d0d7de;
-  --table-border: #d0d7de;
-  --blockquote-border: #d0d7de;
-  --nav-bg: rgba(255, 255, 255, 0.85);
+  /* Light Theme Variables (Nord Snow Storm vs Frost) */
+  --bg-primary: var(--color-nord6);
+  --bg-secondary: var(--color-nord5);
+  --bg-tertiary: var(--color-nord4);
+  --text-primary: var(--color-nord0);
+  --text-secondary: var(--color-nord3);
+  --border-color: var(--color-nord4);
+  --accent-color: var(--color-nord10);
+  --accent-hover: var(--color-nord9);
+  --code-bg: var(--color-nord5);
+  --header-bg: var(--color-nord5);
+  --header-border: var(--color-nord4);
+  --table-border: var(--color-nord4);
+  --blockquote-border: var(--color-nord4);
+  --nav-bg: rgba(236, 239, 244, 0.85);
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
 }
 
 [data-theme='dark'] {
-  /* Dark Theme Variables */
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --text-primary: #e6edf3;
-  --text-secondary: #848d97;
-  --border-color: #30363d;
-  --accent-color: #2f81f7;
-  --accent-hover: #58a6ff;
-  --code-bg: #161b22;
-  --header-bg: #161b22;
-  --header-border: #21262d;
-  --table-border: #30363d;
-  --blockquote-border: #30363d;
-  --nav-bg: rgba(22, 27, 34, 0.85);
+  /* Dark Theme Variables (Nord Polar Night) */
+  --bg-primary: var(--color-nord0);
+  --bg-secondary: var(--color-nord1);
+  --bg-tertiary: var(--color-nord2);
+  --text-primary: var(--color-nord6);
+  --text-secondary: var(--color-nord4);
+  --border-color: var(--color-nord2);
+  --accent-color: var(--color-nord8);
+  --accent-hover: var(--color-nord7);
+  --code-bg: var(--color-nord1);
+  --header-bg: var(--color-nord1);
+  --header-border: var(--color-nord2);
+  --table-border: var(--color-nord2);
+  --blockquote-border: var(--color-nord2);
+  --nav-bg: rgba(46, 52, 64, 0.85);
 }
 
 * {

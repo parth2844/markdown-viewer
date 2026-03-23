@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { MermaidRenderer } from './MermaidRenderer';
 import './MarkdownRenderer.css';
 
@@ -35,7 +35,7 @@ export function MarkdownRenderer({ content, theme }: MarkdownRendererProps) {
                 PreTag="div"
                 children={String(children).replace(/\n$/, '')}
                 language={language}
-                style={theme === 'dark' ? vscDarkPlus : vs}
+                style={nord}
               />
             ) : (
               <code {...rest} className={className}>
