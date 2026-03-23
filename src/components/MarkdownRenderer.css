@@ -51,9 +51,19 @@
   border-left: 0.25em solid var(--blockquote-border);
 }
 
-.markdown-body ul, 
-.markdown-body ol {
+.markdown-body ul {
+  list-style-type: disc;
   padding-left: 2em;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+  padding-left: 2em;
+}
+
+.markdown-body ul ul,
+.markdown-body ol ul {
+  list-style-type: circle;
 }
 
 .markdown-body li + li {
