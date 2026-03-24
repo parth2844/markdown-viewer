@@ -91,16 +91,23 @@
   flex: 1;
   width: 50%;
   height: 100%;
-  overflow-y: auto;
 }
 
 .mode-split .editor-pane {
   border-right: 1px solid var(--border-color);
   background-color: var(--code-bg);
+  overflow-y: hidden;
 }
 
 .mode-split .preview-pane {
   background-color: var(--bg-primary);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mode-split .preview-pane::-webkit-scrollbar {
+  display: none;
 }
 
 .editor-textarea {
@@ -115,6 +122,7 @@
   font-family: var(--font-mono);
   font-size: 0.95rem;
   line-height: 1.6;
+  overflow-y: auto;
 }
 
 /* Read Mode */
