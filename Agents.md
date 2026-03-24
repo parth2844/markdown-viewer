@@ -7,10 +7,11 @@ This file contains standard operating procedures (SOPs), architectural context, 
 *   **Tech Stack**: React 18, Vite, TypeScript.
 *   **Core Dependencies**: `react-markdown`, `remark-gfm` (for tables/lists), `rehype-katex` (for math equations), and `mermaid` (for dynamic diagrams).
 
-## 2. Architectural Guidelines
-*   **UI Libraries Encouraged**: Do not restrict yourself to Vanilla CSS. You are heavily encouraged to install and utilize modern UI libraries, utility frameworks (like Tailwind CSS), or robust component libraries if they help make the interface significantly more attractive and polished! Ensure any new styling paradigms coordinate logically with the existing Dark/Light theme toggle.
-*   **TypeScript Conventions**: All new components must have strongly-typed `Props` interfaces. Avoid using `any` unless absolutely necessary (like when dynamically parsing complex third-party AST nodes).
-*   **Component Structure**: Keep all React components inside `src/components/`. Name files `ComponentName.tsx` and attach their styles closely in `ComponentName.css`.
+## 2. Architectural Guidelines & Styling
+*   **Tailwind CSS v4 & Nord Theme**: The application's styling architecture is strictly driven by Tailwind CSS v4. Do NOT use standard default Tailwind colors; we have globally overridden the palette with the official **Nord Theme** (`--color-nord0` through `--color-nord15`) to control UI states natively.
+*   **Layout Paradigm (Option 2 Workspace)**: The app uses a "Fixed Left Sidebar" layout. The permanent `.sidebar` container strictly holds global app branding, navigation, and file lists. The `.workspace` pane holds the document-scoped `NavBar` and the actual split-editor panes.
+*   **TypeScript Conventions**: All new components must have strongly-typed `Props` interfaces. Avoid using `any` unless absolutely necessary.
+*   **Component Structure**: Keep all React components inside `src/components/`. Name files `ComponentName.tsx` and prefer utilizing Tailwind utility classes inline whenever possible instead of polluting `.css` files with non-reusable layout logic.
 
 ## 3. Workflows & Verification
 If you are an AI agent modifying this codebase, you must follow these verification steps:
@@ -23,7 +24,7 @@ For complex, multi-step CLI automation (like automated deployments or extensive 
 
 ## 5. Technical Decisions Context
 *   **Markdown Pipeline**: We use `react-markdown` alongside `remark-gfm` (for tables/task lists), `remark-math` & `rehype-katex` (for formulas), and `mermaid`. This modular plugin architecture avoids monolithic parser bloat while natively supporting high-end developer constructs.
-*   **Syntax Highlighting**: We use `react-syntax-highlighter` (Prism) mapping to the active UI theme dynamically.
+*   **Syntax Highlighting**: We use `react-syntax-highlighter` (Prism). It is explicitly coded to dynamically swap between the `nord` theme (in Dark mode) and the bright `vs` theme (in Light mode) so code blocks remain perfectly legible at all times.
 *   **Raw Content Imports**: The default markdown content is isolated in `src/assets/default.md` and imported using Vite's `?raw` import tag (`import content from './assets/default.md?raw'`). This deliberately ensures we don't pollute `.tsx` logic with massive multi-line template literals or escape-sequence hacks.
 *   **Print Fidelity**: PDF layout is governed directly via `@media print`. It explicitly strips UI elements (`.no-print`) and enforces `page-break-inside: avoid` on charts, images, and tables for pristine documentation generation.
 

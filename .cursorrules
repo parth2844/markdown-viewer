@@ -1,0 +1,5 @@
+# Project-Wide AI Rules
+
+1. ALWAYS begin significant tasks by briefly reviewing `Agents.md` to perfectly understand the architectural layout, theme rules, and UI expectations.
+2. NEVER deviate from the rules set inside `Agents.md` without explicitly confirming with the user first.
+3. **DOCUMENTATION CHECKPOINT**: If you ever implement a brand new architectural change, install a new major dependency, or radically alter the UI paradigm during a session, you MUST retroactively append those details to `Agents.md` before concluding the user's task. Treat `Agents.md` as a living standard operating procedure manual.
