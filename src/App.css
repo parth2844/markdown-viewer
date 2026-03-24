@@ -152,23 +152,150 @@
 
 /* Print Overrides */
 @media print {
-  .app-container {
-    height: auto;
-    overflow: visible;
+  @page {
+    margin: 0.4in;
+    size: auto;
   }
-  
+
+  /* Force pure black & white */
+  :root,
+  [data-theme='dark'] {
+    --bg-primary: #fff !important;
+    --bg-secondary: #fff !important;
+    --bg-tertiary: #fff !important;
+    --text-primary: #000 !important;
+    --text-secondary: #333 !important;
+    --border-color: #ccc !important;
+    --accent-color: #000 !important;
+    --code-bg: #fff !important;
+    --header-bg: #fff !important;
+    --header-border: #ccc !important;
+    --table-border: #ccc !important;
+    --blockquote-border: #ccc !important;
+  }
+
+  /* Hide all non-content UI */
+  .no-print,
+  .sidebar,
+  .navbar,
+  .editor-pane {
+    display: none !important;
+  }
+
+  /* Flatten the flexbox layout completely */
+  .app-container,
+  .workspace,
   .main-content {
-    height: auto;
-    overflow: visible;
-    display: block;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
   }
-  
+
   .preview-pane {
-    overflow: visible;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+    flex: none !important;
   }
-  
+
   .preview-container {
-    padding: 0;
-    max-width: 100%;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Typography — user-specified font sizes */
+  .markdown-body {
+    font-size: 14px !important;
+    line-height: 1.5;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .markdown-body h1 { font-size: 24px !important; }
+  .markdown-body h2 { font-size: 20px !important; }
+  .markdown-body h3 { font-size: 18px !important; }
+  .markdown-body h4 { font-size: 16px !important; }
+  .markdown-body h5,
+  .markdown-body h6 { font-size: 14px !important; }
+
+  .markdown-body p,
+  .markdown-body li,
+  .markdown-body td,
+  .markdown-body th,
+  .markdown-body blockquote {
+    font-size: 14px !important;
+  }
+
+  /* Lists — ensure bullets/numbers show */
+  .markdown-body ul {
+    list-style-type: disc !important;
+    padding-left: 2em !important;
+  }
+
+  .markdown-body ol {
+    list-style-type: decimal !important;
+    padding-left: 2em !important;
+  }
+
+  /* Prevent awkward page breaks */
+  .markdown-body pre,
+  .markdown-body table,
+  .markdown-body blockquote,
+  .markdown-body img,
+  .mermaid-block {
+    page-break-inside: avoid;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2,
+  .markdown-body h3 {
+    page-break-after: avoid;
+  }
+
+  /* Code blocks */
+  .markdown-body pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid #ccc !important;
+    background-color: #fff !important;
+  }
+
+  .markdown-body pre > div {
+    background-color: transparent !important;
+  }
+
+  .markdown-body code {
+    background-color: transparent !important;
+  }
+
+  /* Tables — pure white */
+  .markdown-body table tr,
+  .markdown-body table tr:nth-child(2n) {
+    background-color: #fff !important;
+  }
+
+  /* Mermaid blocks — preserve SVG colors */
+  .mermaid-block {
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+  }
+
+  /* Protect Mermaid SVG internals from B&W overrides */
+  .mermaid-block svg,
+  .mermaid-block svg * {
+    color: initial;
+    fill: initial;
+    stroke: initial;
+  }
+
+  /* Force background colors to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

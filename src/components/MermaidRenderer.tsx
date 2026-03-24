@@ -46,7 +46,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
 
   return (
     <div 
-      className="mermaid-block no-print" 
+      className="mermaid-block" 
       ref={containerRef}
       dangerouslySetInnerHTML={{ __html: svg }} 
     />
