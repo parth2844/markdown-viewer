@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavBar } from './components/NavBar';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
-import { FileText } from 'lucide-react';
+import { FileText, Copy, ClipboardPaste, Check } from 'lucide-react';
 import DEFAULT_MARKDOWN from './assets/default.md?raw';
 import './App.css';
 
@@ -12,6 +12,8 @@ function App() {
   
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const [copiedRaw, setCopiedRaw] = useState(false);
 
   const blockScrollSync = useRef<'editor' | 'preview' | null>(null);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -26,6 +28,24 @@ function App() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleCopyRaw = () => {
+    navigator.clipboard.writeText(markdown);
+    setCopiedRaw(true);
+    setTimeout(() => setCopiedRaw(false), 2000);
+  };
+
+  const handlePasteRaw = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setMarkdown(text);
+      if (editorRef.current) {
+        editorRef.current.focus();
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+    }
   };
 
   const clearSyncBlock = () => {
@@ -98,6 +118,14 @@ function App() {
         <main className={`main-content mode-${viewMode}`}>
           {viewMode === 'split' && (
             <div className="editor-pane no-print">
+              <div className="pane-floating-actions">
+                <button className="floating-btn" onClick={handleCopyRaw} title="Copy Raw Markdown">
+                  {copiedRaw ? <Check size={16} /> : <Copy size={16} />}
+                </button>
+                <button className="floating-btn" onClick={handlePasteRaw} title="Paste Markdown">
+                  <ClipboardPaste size={16} />
+                </button>
+              </div>
               <textarea
                 ref={editorRef}
                 className="editor-textarea"

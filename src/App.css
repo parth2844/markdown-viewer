@@ -97,6 +97,36 @@
   border-right: 1px solid var(--border-color);
   background-color: var(--code-bg);
   overflow-y: hidden;
+  position: relative;
+}
+
+.pane-floating-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.floating-btn {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.floating-btn:hover {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+  border-color: var(--accent-color);
 }
 
 .mode-split .preview-pane {
