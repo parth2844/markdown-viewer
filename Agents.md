@@ -9,7 +9,7 @@ This file contains standard operating procedures (SOPs), architectural context, 
 
 ## 2. Architectural Guidelines & Styling
 *   **Tailwind CSS v4 & Nord Theme**: The application's styling architecture is strictly driven by Tailwind CSS v4. Do NOT use standard default Tailwind colors; we have globally overridden the palette with the official **Nord Theme** (`--color-nord0` through `--color-nord15`) to control UI states natively.
-*   **Layout Paradigm (Option 2 Workspace)**: The app uses a "Fixed Left Sidebar" layout. The permanent `.sidebar` container strictly holds global app branding, navigation, and file lists. The `.workspace` pane holds the document-scoped `NavBar` and the actual split-editor panes.
+*   **Layout Paradigm (Option 2 Workspace)**: The app uses a "Fixed Left Sidebar" layout. The permanent `.sidebar` container strictly holds global app branding, navigation, and file lists (encapsulated in `Sidebar.tsx`). The `.workspace` pane holds the document-scoped `NavBar` and the actual split-editor panes (encapsulated in `EditorWorkspace.tsx`). `App.tsx` serves purely as the layout shell and global state manager.
 *   **TypeScript Conventions**: All new components must have strongly-typed `Props` interfaces. Avoid using `any` unless absolutely necessary.
 *   **Component Structure**: Keep all React components inside `src/components/`. Name files `ComponentName.tsx` and prefer utilizing Tailwind utility classes inline whenever possible instead of polluting `.css` files with non-reusable layout logic.
 

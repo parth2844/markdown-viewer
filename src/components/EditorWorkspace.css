@@ -1,0 +1,111 @@
+/* Workspace containing NavBar + Main Content */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 56px); /* subtract navbar height */
+}
+
+/* Split Mode */
+.mode-split .editor-pane,
+.mode-split .preview-pane {
+  flex: 1;
+  width: 50%;
+  height: 100%;
+}
+
+.mode-split .editor-pane {
+  border-right: 1px solid var(--border-color);
+  background-color: var(--code-bg);
+  overflow-y: hidden;
+  position: relative;
+}
+
+.pane-floating-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.floating-btn {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.floating-btn:hover {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+  border-color: var(--accent-color);
+}
+
+.mode-split .preview-pane {
+  background-color: var(--bg-primary);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mode-split .preview-pane::-webkit-scrollbar {
+  display: none;
+}
+
+.editor-textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  padding: 1.5rem;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  overflow-y: auto;
+}
+
+/* Read Mode */
+.mode-read .editor-pane {
+  display: none;
+}
+
+.mode-read .preview-pane {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: var(--bg-primary);
+  display: flex;
+  justify-content: center;
+}
+
+.mode-read .preview-container {
+  max-width: 850px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.preview-container {
+  padding: 2rem;
+}
