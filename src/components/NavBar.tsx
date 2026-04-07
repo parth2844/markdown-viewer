@@ -3,6 +3,7 @@ import { Sun, Moon, Printer, Layout, FileText } from 'lucide-react';
 import './NavBar.css';
 
 interface NavBarProps {
+  title: string;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   viewMode: 'split' | 'read';
@@ -10,12 +11,12 @@ interface NavBarProps {
   onPrint: () => void;
 }
 
-export function NavBar({ theme, toggleTheme, viewMode, setViewMode, onPrint }: NavBarProps) {
+export function NavBar({ title, theme, toggleTheme, viewMode, setViewMode, onPrint }: NavBarProps) {
   return (
     <nav className="navbar no-print">
       <div className="navbar-left">
         <h2 className="navbar-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem', fontWeight: 600 }}>
-          <FileText size={16} /> default.md
+          <FileText size={16} /> {title}
         </h2>
       </div>
       <div className="navbar-center">

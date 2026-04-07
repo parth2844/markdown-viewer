@@ -5,13 +5,15 @@ import { Copy, ClipboardPaste, Check } from 'lucide-react';
 import './EditorWorkspace.css';
 
 interface EditorWorkspaceProps {
+  title: string;
   content: string;
+  readOnly?: boolean;
   onChange: (newContent: string) => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
 }
 
-export function EditorWorkspace({ content, onChange, theme, toggleTheme }: EditorWorkspaceProps) {
+export function EditorWorkspace({ title, content, readOnly = false, onChange, theme, toggleTheme }: EditorWorkspaceProps) {
   const [viewMode, setViewMode] = useState<'split' | 'read'>('split');
   const [copiedRaw, setCopiedRaw] = useState(false);
   
@@ -85,6 +87,7 @@ export function EditorWorkspace({ content, onChange, theme, toggleTheme }: Edito
   return (
     <div className="workspace">
       <NavBar 
+        title={title}
         theme={theme} 
         toggleTheme={toggleTheme} 
         viewMode={viewMode} 
@@ -99,14 +102,17 @@ export function EditorWorkspace({ content, onChange, theme, toggleTheme }: Edito
               <button className="floating-btn" onClick={handleCopyRaw} title="Copy Raw Markdown">
                 {copiedRaw ? <Check size={16} /> : <Copy size={16} />}
               </button>
-              <button className="floating-btn" onClick={handlePasteRaw} title="Paste Markdown">
-                <ClipboardPaste size={16} />
-              </button>
+              {!readOnly && (
+                <button className="floating-btn" onClick={handlePasteRaw} title="Paste Markdown">
+                  <ClipboardPaste size={16} />
+                </button>
+              )}
             </div>
             <textarea
               ref={editorRef}
               className="editor-textarea"
               value={content}
+              readOnly={readOnly}
               onChange={(e) => onChange(e.target.value)}
               onScroll={handleEditorScroll}
               placeholder="Type markdown here..."

@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { EditorWorkspace } from './components/EditorWorkspace';
-import DEFAULT_MARKDOWN from './assets/default.md?raw';
+import { useWorkspaceManager, SYSTEM_TUTORIAL_ID } from './hooks/useWorkspaceManager';
 import './App.css';
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
-  // Future state for multi-file support:
-  // const [files, setFiles] = useState([...]);
-  // const [activeFileId, setActiveFileId] = useState(...);
-  
-  // For now, holding the single file state here:
-  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
+  const {
+    files,
+    tutorialFile,
+    activeFile,
+    activeFileId,
+    setActiveFileId,
+    createNewFile,
+    updateFileContent,
+    renameFile,
+    deleteFile
+  } = useWorkspaceManager();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -20,12 +25,24 @@ function App() {
 
   const toggleTheme = () => setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
 
+  const isTutorial = activeFileId === SYSTEM_TUTORIAL_ID;
+
   return (
     <div className="app-container">
-      <Sidebar activeFileName="default.md" />
+      <Sidebar 
+        files={files}
+        tutorialFile={tutorialFile}
+        activeFileId={activeFileId}
+        onSelectFile={setActiveFileId}
+        onCreateFile={createNewFile}
+        onDeleteFile={deleteFile}
+        onRenameFile={renameFile}
+      />
       <EditorWorkspace 
-        content={markdown}
-        onChange={setMarkdown}
+        title={activeFile?.title || 'Untitled Document'}
+        content={activeFile?.content || ''}
+        readOnly={isTutorial}
+        onChange={(content) => activeFile && updateFileContent(activeFile.id, content)}
         theme={theme} 
         toggleTheme={toggleTheme} 
       />
