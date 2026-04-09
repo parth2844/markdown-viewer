@@ -94,8 +94,10 @@
 }
 
 .file-item.active {
-  background-color: var(--accent-color);
-  color: var(--bg-primary); /* Inverts text color effectively */
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
+  font-weight: 600;
+  box-shadow: inset 4px 0 0 var(--accent-color);
 }
 
 .file-icon {
@@ -135,11 +137,7 @@
 
 .action-btn:hover {
   opacity: 1;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.active .action-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--border-color);
 }
 
 .file-rename-form {

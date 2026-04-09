@@ -120,10 +120,10 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     border: 1px solid #ccc !important;
-    background-color: #fff !important;
+    background-color: #fcfcfc !important;
   }
 
-  .markdown-body pre > div {
+  .markdown-body pre div {
     background-color: transparent !important;
   }
 
@@ -149,6 +149,12 @@
     color: initial;
     fill: initial;
     stroke: initial;
+  }
+
+  /* Dark mode inversion for print */
+  [data-theme='dark'] .code-block-wrapper code span,
+  [data-theme='dark'] .mermaid-block svg {
+    filter: invert(1) hue-rotate(180deg);
   }
 
   /* Force background colors to print */
