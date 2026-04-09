@@ -74,6 +74,11 @@ export function useWorkspaceManager() {
     const handler = setTimeout(() => {
       let filesToSave = [...files];
       let saved = false;
+
+      if (filesToSave.length === 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+        return;
+      }
       
       while (filesToSave.length > 0 && !saved) {
         try {
