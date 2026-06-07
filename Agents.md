@@ -38,6 +38,10 @@ For complex, multi-step CLI automation (like automated deployments or extensive 
     *   We evaluated `html2pdf.js` (Path B) but rejected it due to rendering issues with list markers, strikethrough text, and Mermaid SVGs. Native `window.print()` handles all of these correctly.
 *   **Scroll Sync**: The split editor uses two-way scroll synchronization with a collision-blocking timer (`blockScrollSync` ref) to prevent infinite scroll loops between the editor and preview panes.
 *   **Default Theme**: The application defaults to **Light mode** on first load.
+*   **Mermaid Export Engine & Tainted Canvas Prevention**: Diagram exporting (Copy PNG, Download PNG) is cleanly delegated to the custom hook `useMermaidExport.ts`. To prevent canvas security errors (Tainted Canvases):
+    *   Mermaid is initialized with `flowchart: { htmlLabels: false }` to prevent nesting of `<foreignObject>` containing HTML structures.
+    *   The SVG is serialized as a **Base64 Data URL** (`data:image/svg+xml;base64,...`) instead of an Object URL before drawing onto the export canvas.
+    *   The downloaded file name is resolved dynamically using DOM traversal (`compareDocumentPosition` checking preceding elements in document order) to locate the nearest markdown heading above the diagram, sanitizing it into a safe filename.
 
 ## 6. GitHub Repository & Auto-Deployment
 *   **Remote URL**: `https://github.com/parth2844/markdown-viewer`
