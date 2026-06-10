@@ -118,7 +118,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
 
       {isLightboxOpen && createPortal(
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-8 no-print"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4 md:p-8 no-print"
           onClick={() => setIsLightboxOpen(false)}
         >
           <div 
