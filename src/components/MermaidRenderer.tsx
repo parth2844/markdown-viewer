@@ -82,7 +82,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
         <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 no-print">
           <button
             onClick={() => setIsLightboxOpen(true)}
-            className="px-2 py-1 bg-nord1 dark:bg-nord2 hover:bg-nord3 text-nord6 rounded border border-nord3 cursor-pointer shadow-md flex items-center gap-1 text-xs transition-all duration-150"
+            className="px-2 py-1 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1 text-xs transition-all duration-150 cursor-pointer"
             title="Open fullscreen lightbox"
           >
             <Maximize2 size={12} />
@@ -91,7 +91,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
           
           <button
             onClick={copyPNGToClipboard}
-            className="px-2 py-1 bg-nord1 dark:bg-nord2 hover:bg-nord3 text-nord6 rounded border border-nord3 cursor-pointer shadow-md flex items-center gap-1 text-xs transition-all duration-150"
+            className="px-2 py-1 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1 text-xs transition-all duration-150 cursor-pointer"
             title="Copy as PNG to clipboard"
           >
             {copiedPNG ? <Check size={12} className="text-nord14" /> : <Copy size={12} />}
@@ -100,7 +100,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
           
           <button
             onClick={downloadPNG}
-            className="px-2 py-1 bg-nord1 dark:bg-nord2 hover:bg-nord3 text-nord6 rounded border border-nord3 cursor-pointer shadow-md flex items-center gap-1 text-xs transition-all duration-150"
+            className="px-2 py-1 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1 text-xs transition-all duration-150 cursor-pointer"
             title="Download PNG image file"
             disabled={downloading}
           >
@@ -118,22 +118,22 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
 
       {isLightboxOpen && createPortal(
         <div 
-          className="fixed inset-0 bg-nord0/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-8 no-print"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-8 no-print"
           onClick={() => setIsLightboxOpen(false)}
         >
           <div 
-            className="relative max-w-5xl w-full max-h-[90vh] bg-nord6 dark:bg-nord0 border border-nord4 dark:border-nord2 rounded-xl shadow-2xl p-6 flex flex-col items-center justify-between animate-in fade-in zoom-in-95 duration-200"
+            className="relative max-w-5xl w-full max-h-[90vh] bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl shadow-2xl p-6 flex flex-col items-center justify-between animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="w-full flex items-center justify-between border-b border-nord4 dark:border-nord2 pb-3 mb-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-nord3 dark:text-nord4">
+            <div className="w-full flex items-center justify-between border-b border-[var(--border-color)] pb-3 mb-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 {getHeadingAbove() || 'Diagram Preview'}
               </h3>
               
               <button
                 onClick={() => setIsLightboxOpen(false)}
-                className="p-1.5 rounded-full hover:bg-nord5 dark:hover:bg-nord1 text-nord3 dark:text-nord4 hover:text-nord0 dark:hover:text-nord6 transition-colors duration-150 cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-150 cursor-pointer"
                 title="Close lightbox"
               >
                 <X size={18} />
@@ -147,10 +147,10 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
             />
             
             {/* Modal Footer Actions */}
-            <div className="w-full flex items-center justify-end gap-2 border-t border-nord4 dark:border-nord2 pt-3 mt-4">
+            <div className="w-full flex items-center justify-end gap-2 border-t border-[var(--border-color)] pt-3 mt-4">
               <button
                 onClick={copyPNGToClipboard}
-                className="px-3 py-1.5 bg-nord1 dark:bg-nord2 hover:bg-nord3 text-nord6 rounded border border-nord3 cursor-pointer shadow-md flex items-center gap-1.5 text-xs transition-all duration-150"
+                className="px-3 py-1.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1.5 text-xs transition-all duration-150 cursor-pointer"
               >
                 {copiedPNG ? <Check size={14} className="text-nord14" /> : <Copy size={14} />}
                 <span>{copiedPNG ? 'Copied PNG' : 'Copy PNG'}</span>
@@ -158,7 +158,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
               
               <button
                 onClick={downloadPNG}
-                className="px-3 py-1.5 bg-nord1 dark:bg-nord2 hover:bg-nord3 text-nord6 rounded border border-nord3 cursor-pointer shadow-md flex items-center gap-1.5 text-xs transition-all duration-150"
+                className="px-3 py-1.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1.5 text-xs transition-all duration-150 cursor-pointer"
                 disabled={downloading}
               >
                 <Download size={14} className={downloading ? 'animate-bounce' : ''} />
