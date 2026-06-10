@@ -42,6 +42,7 @@ For complex, multi-step CLI automation (like automated deployments or extensive 
     *   Mermaid is initialized with `flowchart: { htmlLabels: false }` to prevent nesting of `<foreignObject>` containing HTML structures.
     *   The SVG is serialized as a **Base64 Data URL** (`data:image/svg+xml;base64,...`) instead of an Object URL before drawing onto the export canvas.
     *   The downloaded file name is resolved dynamically using DOM traversal (`compareDocumentPosition` checking preceding elements in document order) to locate the nearest markdown heading above the diagram, sanitizing it into a safe filename.
+    *   A fullscreen lightbox modal is supported via React Portals (`createPortal`) targeting `document.body` to bypass any scroll/layout clipping from parent containers.
 
 ## 6. GitHub Repository & Auto-Deployment
 *   **Remote URL**: `https://github.com/parth2844/markdown-viewer`

@@ -170,5 +170,6 @@ export function useMermaidExport(containerRef: RefObject<HTMLDivElement | null>,
     downloading,
     copyPNGToClipboard,
     downloadPNG,
+    getHeadingAbove,
   };
 }
