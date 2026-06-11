@@ -51,6 +51,17 @@ export function MarkdownRenderer({ content, theme }: MarkdownRendererProps) {
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
+          pre(props: any) {
+            const { children, ...rest } = props;
+            const hasMermaid = Array.isArray(children)
+              ? children.some((child: any) => child && child.props && child.props.className === 'language-mermaid')
+              : children && children.props && children.props.className === 'language-mermaid';
+              
+            if (hasMermaid) {
+              return <>{children}</>;
+            }
+            return <pre {...rest}>{children}</pre>;
+          },
           code(props: any) {
             const {children, className, node, ref, ...rest} = props;
             const match = /language-(\w+)/.exec(className || '');

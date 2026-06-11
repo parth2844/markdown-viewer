@@ -1,0 +1,203 @@
+/* Mermaid wrapper */
+.mermaid-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Toolbar overlay on hover */
+.mermaid-toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 10;
+}
+
+.mermaid-wrapper:hover .mermaid-toolbar {
+  opacity: 1;
+}
+
+/* Toolbar action buttons */
+.mermaid-btn {
+  padding: 4px 8px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+.mermaid-btn:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.mermaid-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Lightbox Modal Backdrop */
+.mermaid-lightbox-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .mermaid-lightbox-backdrop {
+    padding: 32px;
+  }
+}
+
+/* Lightbox Modal Box */
+.mermaid-lightbox-content {
+  position: relative;
+  width: 90vw;
+  max-width: 90vw;
+  height: 85vh;
+  max-height: 85vh;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  animation: mermaidZoomIn 0.2s ease-out;
+}
+
+@keyframes mermaidZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Modal Header */
+.mermaid-modal-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 24px;
+  background-color: var(--bg-secondary);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .mermaid-modal-header {
+    padding: 16px 32px;
+  }
+}
+
+.mermaid-modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 16px;
+  margin: 0;
+}
+
+.mermaid-modal-close {
+  padding: 6px;
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.mermaid-modal-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Modal Diagram Body */
+.mermaid-modal-body {
+  width: 100%;
+  flex: 1 1 0%;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .mermaid-modal-body {
+    padding: 32px;
+  }
+}
+
+/* SVG scale properties inside the modal */
+.mermaid-modal-body svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 58vh !important;
+}
+
+/* Modal Footer */
+.mermaid-modal-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--border-color);
+  padding: 16px 24px;
+  background-color: var(--bg-secondary);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .mermaid-modal-footer {
+    padding: 16px 32px;
+  }
+}
+
+.mermaid-modal-footer .mermaid-btn {
+  background-color: var(--bg-primary);
+  padding: 6px 12px;
+}
+
+.mermaid-modal-footer .mermaid-btn:hover {
+  background-color: var(--bg-tertiary);
+}

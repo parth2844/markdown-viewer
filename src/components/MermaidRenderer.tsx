@@ -3,6 +3,7 @@ import mermaid from 'mermaid';
 import { Copy, Check, Download, Maximize2, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useMermaidExport } from '../hooks/useMermaidExport';
+import './MermaidRenderer.css';
 
 interface MermaidRendererProps {
   code: string;
@@ -77,12 +78,12 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
   const isError = svg.includes('class="error"');
 
   return (
-    <div className="mermaid-block relative group flex flex-col items-center">
+    <div className="mermaid-wrapper">
       {svg && !isError && (
-        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 no-print">
+        <div className="mermaid-toolbar no-print">
           <button
             onClick={() => setIsLightboxOpen(true)}
-            className="px-2 py-1 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1 text-xs transition-all duration-150 cursor-pointer"
+            className="mermaid-btn"
             title="Open fullscreen lightbox"
           >
             <Maximize2 size={12} />
@@ -91,7 +92,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
           
           <button
             onClick={copyPNGToClipboard}
-            className="px-2 py-1 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1 text-xs transition-all duration-150 cursor-pointer"
+            className="mermaid-btn"
             title="Copy as PNG to clipboard"
           >
             {copiedPNG ? <Check size={12} className="text-nord14" /> : <Copy size={12} />}
@@ -100,7 +101,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
           
           <button
             onClick={downloadPNG}
-            className="px-2 py-1 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1 text-xs transition-all duration-150 cursor-pointer"
+            className="mermaid-btn"
             title="Download PNG image file"
             disabled={downloading}
           >
@@ -111,29 +112,29 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
       )}
       
       <div 
-        className="w-full overflow-x-auto flex justify-center" 
+        className="mermaid-block" 
         ref={containerRef}
         dangerouslySetInnerHTML={{ __html: svg }} 
       />
 
       {isLightboxOpen && createPortal(
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4 md:p-8 no-print"
+          className="mermaid-lightbox-backdrop no-print"
           onClick={() => setIsLightboxOpen(false)}
         >
           <div 
-            className="relative w-[90vw] max-w-[90vw] h-[85vh] max-h-[85vh] bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-between animate-in fade-in zoom-in-95 duration-200"
+            className="mermaid-lightbox-content"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="w-full flex items-center justify-between border-b border-[var(--border-color)] pb-3 mb-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)] truncate pr-4">
+            <div className="mermaid-modal-header">
+              <h3 className="mermaid-modal-title">
                 {getHeadingAbove() || 'Diagram Preview'}
               </h3>
               
               <button
                 onClick={() => setIsLightboxOpen(false)}
-                className="p-1.5 rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-150 cursor-pointer"
+                className="mermaid-modal-close"
                 title="Close lightbox"
               >
                 <X size={18} />
@@ -142,15 +143,15 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
             
             {/* Diagram Content */}
             <div 
-              className="w-full flex-1 overflow-auto flex items-center justify-center p-6 md:p-8 [&>svg]:!w-full [&>svg]:!max-w-full [&>svg]:!h-auto [&>svg]:!max-h-[60vh]"
+              className="mermaid-modal-body"
               dangerouslySetInnerHTML={{ __html: svg }}
             />
             
             {/* Modal Footer Actions */}
-            <div className="w-full flex items-center justify-end gap-2 border-t border-[var(--border-color)] pt-3 mt-4">
+            <div className="mermaid-modal-footer">
               <button
                 onClick={copyPNGToClipboard}
-                className="px-3 py-1.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1.5 text-xs transition-all duration-150 cursor-pointer"
+                className="mermaid-btn"
               >
                 {copiedPNG ? <Check size={14} className="text-nord14" /> : <Copy size={14} />}
                 <span>{copiedPNG ? 'Copied PNG' : 'Copy PNG'}</span>
@@ -158,7 +159,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
               
               <button
                 onClick={downloadPNG}
-                className="px-3 py-1.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded shadow-md flex items-center gap-1.5 text-xs transition-all duration-150 cursor-pointer"
+                className="mermaid-btn"
                 disabled={downloading}
               >
                 <Download size={14} className={downloading ? 'animate-bounce' : ''} />
