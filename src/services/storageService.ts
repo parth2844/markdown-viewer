@@ -185,6 +185,49 @@ class StorageService {
       request.onerror = () => reject(request.error);
     });
   }
+
+  /**
+   * Retrieves the stored local folder directory handle from settings.
+   */
+  async getLocalFolderHandle(): Promise<FileSystemDirectoryHandle | null> {
+    if (!this.db) throw new Error("Database not initialized");
+
+    return new Promise<FileSystemDirectoryHandle | null>((resolve, reject) => {
+      const transaction = this.db!.transaction('settings', 'readonly');
+      const store = transaction.objectStore('settings');
+      const request = store.get('localFolderHandle');
+
+      request.onsuccess = () => {
+        resolve(request.result || null);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
+  /**
+   * Saves the local folder directory handle.
+   */
+  async setLocalFolderHandle(handle: FileSystemDirectoryHandle | null): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized");
+
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db!.transaction('settings', 'readwrite');
+      const store = transaction.objectStore('settings');
+
+      let request;
+      if (handle === null) {
+        request = store.delete('localFolderHandle');
+      } else {
+        request = store.put(handle, 'localFolderHandle');
+      }
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
 }
 
 export const storageService = new StorageService();

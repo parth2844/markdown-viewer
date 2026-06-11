@@ -17,7 +17,19 @@ function App() {
     createNewFile,
     updateFileContent,
     renameFile,
-    deleteFile
+    deleteFile,
+
+    // Local Folder Integration
+    localFolderSupported,
+    localFolderName,
+    localFolderTree,
+    isFolderLocked,
+    connectLocalFolder,
+    disconnectLocalFolder,
+    unlockLocalFolder,
+    createLocalFile,
+    renameLocalFile,
+    deleteLocalFile
   } = useWorkspaceManager();
 
   useEffect(() => {
@@ -53,6 +65,18 @@ function App() {
         onCreateFile={createNewFile}
         onDeleteFile={deleteFile}
         onRenameFile={renameFile}
+
+        // Local Folder Integration
+        localFolderSupported={localFolderSupported}
+        localFolderName={localFolderName}
+        localFolderTree={localFolderTree}
+        isFolderLocked={isFolderLocked}
+        onConnectFolder={connectLocalFolder}
+        onDisconnectFolder={disconnectLocalFolder}
+        onUnlockFolder={unlockLocalFolder}
+        onCreateLocalFile={createLocalFile}
+        onDeleteLocalFile={deleteLocalFile}
+        onRenameLocalFile={renameLocalFile}
       />
       <EditorWorkspace 
         title={activeFile?.title || 'Untitled Document'}
