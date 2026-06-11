@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import DEFAULT_MARKDOWN from '../assets/default.md?raw';
+import { storageService } from '../services/storageService';
 
 export interface MarkdownFile {
   id: string;
@@ -8,9 +9,6 @@ export interface MarkdownFile {
   content: string;
   lastModified: number;
 }
-
-const STORAGE_KEY = 'markdown-viewer-files';
-const ACTIVE_FILE_KEY = 'markdown-viewer-active-file';
 
 export const SYSTEM_TUTORIAL_ID = 'system-tutorial';
 
@@ -39,81 +37,58 @@ function extractTitleFromMarkdown(content: string): string | null {
 }
 
 export function useWorkspaceManager() {
-  const [files, setFiles] = useState<MarkdownFile[]>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+  const [files, setFiles] = useState<MarkdownFile[]>([]);
+  const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Initialize DB and load files on mount
+  useEffect(() => {
+    async function initWorkspace() {
+      try {
+        await storageService.init();
+        const loadedFiles = await storageService.getAllFiles();
+        const loadedActiveId = await storageService.getActiveFileId();
+
+        setFiles(loadedFiles);
+
+        if (loadedActiveId && (loadedActiveId === SYSTEM_TUTORIAL_ID || loadedFiles.some(f => f.id === loadedActiveId))) {
+          setActiveFileId(loadedActiveId);
+        } else {
+          setActiveFileId(loadedFiles.length > 0 ? loadedFiles[0].id : SYSTEM_TUTORIAL_ID);
         }
+      } catch (e) {
+        console.error("Failed to initialize workspace storage:", e);
+        setActiveFileId(SYSTEM_TUTORIAL_ID);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.error("Failed to load files from storage", e);
     }
-    
-    // Default state if nothing in local storage
-    return [];
-  });
+    initWorkspace();
+  }, []);
 
-  const [activeFileId, setActiveFileId] = useState<string | null>(() => {
-    return localStorage.getItem(ACTIVE_FILE_KEY) || (files.length > 0 ? files[0].id : SYSTEM_TUTORIAL_ID);
-  });
-
-  // Update ACTIVE_FILE_KEY in LS whenever it changes
+  // Sync active file ID to storage service
   useEffect(() => {
-    if (activeFileId) {
-       localStorage.setItem(ACTIVE_FILE_KEY, activeFileId);
-    } else {
-       localStorage.removeItem(ACTIVE_FILE_KEY);
-    }
-  }, [activeFileId]);
+    if (isLoading) return;
+    storageService.setActiveFileId(activeFileId).catch(err => {
+      console.error("Failed to save active file ID:", err);
+    });
+  }, [activeFileId, isLoading]);
 
-  // Debounced Save with Eviction Policy
+  // Debounced auto-save for files state (specifically for content updates)
   useEffect(() => {
+    if (isLoading || !activeFileId || activeFileId === SYSTEM_TUTORIAL_ID) return;
+
+    const currentFile = files.find(f => f.id === activeFileId);
+    if (!currentFile) return;
+
     const handler = setTimeout(() => {
-      let filesToSave = [...files];
-      let saved = false;
+      storageService.saveFile(currentFile).catch(err => {
+        console.error("Failed to auto-save file:", err);
+      });
+    }, 500);
 
-      if (filesToSave.length === 0) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-        return;
-      }
-      
-      while (filesToSave.length > 0 && !saved) {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(filesToSave));
-          saved = true;
-          
-          // If we had to evict files to save, we must also update the React state to match
-          if (filesToSave.length !== files.length) {
-              setFiles(filesToSave);
-              // Check if we evicted the active file
-              if (activeFileId && !filesToSave.some(f => f.id === activeFileId)) {
-                  setActiveFileId(filesToSave[0]?.id || null);
-              }
-          }
-        } catch (e: any) {
-          if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-            console.warn("Storage quota exceeded. Evicting oldest file...");
-            if (filesToSave.length <= 1) {
-               console.error("Cannot evict the last remaining file.");
-               break; // Give up
-            }
-            // Sort by lastModified descending (newest first)
-            filesToSave.sort((a, b) => b.lastModified - a.lastModified);
-            // Remove the oldest (last element)
-            filesToSave.pop();
-          } else {
-             console.error("Failed to save to local storage", e);
-             break; // Unknown error, give up
-          }
-        }
-      }
-    }, 500); // 500ms debounce
-    
     return () => clearTimeout(handler);
-  }, [files, activeFileId]);
+  }, [files, activeFileId, isLoading]);
 
   const activeFile = activeFileId === SYSTEM_TUTORIAL_ID 
      ? tutorialFile 
@@ -127,8 +102,14 @@ export function useWorkspaceManager() {
       content: '',
       lastModified: Date.now()
     };
+    
     setFiles(prev => [newFile, ...prev]);
     setActiveFileId(newFile.id);
+    
+    // Save to DB immediately
+    storageService.saveFile(newFile).catch(err => {
+      console.error("Failed to save newly created file:", err);
+    });
   };
 
   const updateFileContent = (id: string, content: string) => {
@@ -136,7 +117,6 @@ export function useWorkspaceManager() {
       if (f.id !== id) return f;
       
       let title = f.title;
-      // Deduce title if user hasn't statically set one
       if (!f.customTitle) {
          const deduced = extractTitleFromMarkdown(content);
          if (deduced) title = deduced;
@@ -146,32 +126,40 @@ export function useWorkspaceManager() {
         ...f,
         content,
         title,
-        lastModified: Date.now() // Always bump modified timestamp on edit
+        lastModified: Date.now()
       };
     }));
   };
 
   const renameFile = (id: string, newTitle: string) => {
-    setFiles(prev => prev.map(f => {
-      if (f.id === id) {
-         return {
-            ...f,
-            title: newTitle || 'Untitled Document',
-            customTitle: true,
-            lastModified: Date.now()
-         };
-      }
-      return f;
-    }));
+    const targetFile = files.find(f => f.id === id);
+    if (!targetFile) return;
+
+    const updatedFile = {
+      ...targetFile,
+      title: newTitle || 'Untitled Document',
+      customTitle: true,
+      lastModified: Date.now()
+    };
+
+    setFiles(prev => prev.map(f => (f.id === id ? updatedFile : f)));
+
+    storageService.saveFile(updatedFile).catch(err => {
+      console.error("Failed to save renamed file:", err);
+    });
   };
 
   const deleteFile = (id: string) => {
     if (id === SYSTEM_TUTORIAL_ID) return;
     
-    const newFiles = files.filter(f => f.id !== id);
-    setFiles(newFiles);
+    setFiles(prev => prev.filter(f => f.id !== id));
     
+    storageService.deleteFile(id).catch(err => {
+      console.error("Failed to delete file from DB:", err);
+    });
+
     if (activeFileId === id) {
+       const newFiles = files.filter(f => f.id !== id);
        setActiveFileId(newFiles.length > 0 ? newFiles[0].id : SYSTEM_TUTORIAL_ID);
     }
   };
@@ -181,6 +169,7 @@ export function useWorkspaceManager() {
     tutorialFile,
     activeFile,
     activeFileId,
+    isLoading,
     setActiveFileId,
     createNewFile,
     updateFileContent,
