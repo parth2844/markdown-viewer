@@ -122,7 +122,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
           onClick={() => setIsLightboxOpen(false)}
         >
           <div 
-            className="relative max-w-5xl w-full max-h-[90vh] bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-between animate-in fade-in zoom-in-95 duration-200"
+            className="relative w-[90vw] max-w-[90vw] h-[85vh] max-h-[85vh] bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-between animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -142,7 +142,7 @@ export function MermaidRenderer({ code, theme }: MermaidRendererProps) {
             
             {/* Diagram Content */}
             <div 
-              className="w-full flex-1 overflow-auto flex items-center justify-center p-6 md:p-8 [&>svg]:max-w-full [&>svg]:max-h-[60vh] [&>svg]:w-auto [&>svg]:h-auto"
+              className="w-full flex-1 overflow-auto flex items-center justify-center p-6 md:p-8 [&>svg]:!w-full [&>svg]:!max-w-full [&>svg]:!h-auto [&>svg]:!max-h-[60vh]"
               dangerouslySetInnerHTML={{ __html: svg }}
             />
             
