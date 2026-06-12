@@ -210,9 +210,9 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem;
-  background-color: transparent;
-  color: var(--text-secondary);
-  border: 1px dashed var(--border-color);
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+  border: none;
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.85rem;
@@ -222,14 +222,14 @@
 }
 
 .connect-folder-btn:hover:not(:disabled) {
-  color: var(--text-primary);
-  background-color: var(--bg-tertiary);
-  border-color: var(--text-secondary);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .connect-folder-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .folder-node {
