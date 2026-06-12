@@ -21,9 +21,7 @@ function App() {
 
     // Local Folder Integration
     localFolderSupported,
-    localFolderName,
-    localFolderTree,
-    isFolderLocked,
+    localFolders,
     connectLocalFolder,
     disconnectLocalFolder,
     unlockLocalFolder,
@@ -68,9 +66,7 @@ function App() {
 
         // Local Folder Integration
         localFolderSupported={localFolderSupported}
-        localFolderName={localFolderName}
-        localFolderTree={localFolderTree}
-        isFolderLocked={isFolderLocked}
+        localFolders={localFolders}
         onConnectFolder={connectLocalFolder}
         onDisconnectFolder={disconnectLocalFolder}
         onUnlockFolder={unlockLocalFolder}

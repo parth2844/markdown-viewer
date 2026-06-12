@@ -1,6 +1,6 @@
 import { FileText, Plus, Trash2, Edit2, BookOpen, Folder, FolderOpen, ChevronDown, ChevronRight, HardDrive, LogOut } from 'lucide-react';
 import { useState } from 'react';
-import type { MarkdownFile } from '../hooks/useWorkspaceManager';
+import type { MarkdownFile, ConnectedFolder } from '../hooks/useWorkspaceManager';
 import type { LocalDirectoryNode, LocalFileEntry } from '../services/localFolderService';
 import './Sidebar.css';
 
@@ -15,19 +15,18 @@ interface SidebarProps {
 
   // Local Folder Integration
   localFolderSupported: boolean;
-  localFolderName: string | null;
-  localFolderTree: LocalDirectoryNode | null;
-  isFolderLocked: boolean;
+  localFolders: ConnectedFolder[];
   onConnectFolder: () => void;
-  onDisconnectFolder: () => void;
-  onUnlockFolder: () => void;
-  onCreateLocalFile: (filename: string) => void;
+  onDisconnectFolder: (folderId: string) => void;
+  onUnlockFolder: (folderId: string) => void;
+  onCreateLocalFile: (folderId: string, filename: string) => void;
   onDeleteLocalFile: (id: string) => void;
   onRenameLocalFile: (id: string, newTitle: string) => void;
 }
 
 // Recursive FolderNode component
 interface FolderNodeProps {
+  folderId: string;
   node: LocalDirectoryNode;
   activeFileId: string | null;
   onSelectFile: (id: string) => void;
@@ -38,6 +37,7 @@ interface FolderNodeProps {
 }
 
 function FolderNode({
+  folderId,
   node,
   activeFileId,
   onSelectFile,
@@ -59,16 +59,16 @@ function FolderNode({
     }
   };
 
-  const handleStartRename = (file: LocalFileEntry, e: React.MouseEvent) => {
+  const handleStartRename = (fileNamespacedId: string, file: LocalFileEntry, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditingId(file.id);
+    setEditingId(fileNamespacedId);
     setEditTitle(file.name.replace(/\.md$/, '').replace(/\.markdown$/, ''));
   };
 
-  const handleSaveRename = (id: string, e?: React.FormEvent | React.FocusEvent) => {
+  const handleSaveRename = (fileNamespacedId: string, e?: React.FormEvent | React.FocusEvent) => {
     if (e) e.stopPropagation();
     if (editTitle.trim()) {
-      onRenameLocalFile(id, editTitle.trim());
+      onRenameLocalFile(fileNamespacedId, editTitle.trim());
     }
     setEditingId(null);
   };
@@ -98,6 +98,7 @@ function FolderNode({
           {node.directories.map(subDir => (
             <FolderNode
               key={subDir.relativePath}
+              folderId={folderId}
               node={subDir}
               activeFileId={activeFileId}
               onSelectFile={onSelectFile}
@@ -110,19 +111,21 @@ function FolderNode({
 
           {/* Files */}
           {node.files.map(file => {
-            const isActive = activeFileId === file.id;
+            const namespacedId = `local:${folderId}:${file.relativePath}`;
+            const isActive = activeFileId === namespacedId;
+            
             return (
               <div 
-                key={file.id} 
+                key={namespacedId} 
                 className={`file-item ${isActive ? 'active' : ''}`}
-                onClick={() => onSelectFile(file.id)}
+                onClick={() => onSelectFile(namespacedId)}
               >
                 <FileText size={16} className="file-icon" />
                 
-                {editingId === file.id ? (
+                {editingId === namespacedId ? (
                   <form 
                     className="file-rename-form" 
-                    onSubmit={(e) => { e.preventDefault(); handleSaveRename(file.id); }}
+                    onSubmit={(e) => { e.preventDefault(); handleSaveRename(namespacedId); }}
                   >
                     <input 
                       autoFocus
@@ -130,22 +133,22 @@ function FolderNode({
                       value={editTitle}
                       onChange={e => setEditTitle(e.target.value)}
                       onClick={e => e.stopPropagation()}
-                      onBlur={() => handleSaveRename(file.id)}
+                      onBlur={() => handleSaveRename(namespacedId)}
                     />
                   </form>
                 ) : (
                   <span className="file-name" title={file.name}>{file.name}</span>
                 )}
                 
-                {editingId !== file.id && (
+                {editingId !== namespacedId && (
                   <div className="file-item-actions">
-                     <button className="action-btn" onClick={(e) => handleStartRename(file, e)} title="Rename">
+                     <button className="action-btn" onClick={(e) => handleStartRename(namespacedId, file, e)} title="Rename">
                        <Edit2 size={14} />
                      </button>
                      <button className="action-btn delete-btn" onClick={(e) => {
                         e.stopPropagation();
                         if (window.confirm(`Are you sure you want to delete "${file.name}"?`)) {
-                           onDeleteLocalFile(file.id);
+                           onDeleteLocalFile(namespacedId);
                         }
                      }} title="Delete">
                        <Trash2 size={14} />
@@ -172,9 +175,7 @@ export function Sidebar({
 
   // Local Folder Integration
   localFolderSupported,
-  localFolderName,
-  localFolderTree,
-  isFolderLocked,
+  localFolders,
   onConnectFolder,
   onDisconnectFolder,
   onUnlockFolder,
@@ -199,10 +200,10 @@ export function Sidebar({
     setEditingId(null);
   };
 
-  const handleCreateRootLocalFile = () => {
+  const handleCreateRootLocalFile = (folderId: string) => {
     const filename = window.prompt("Enter new markdown file name:");
     if (filename && filename.trim()) {
-      onCreateLocalFile(filename.trim());
+      onCreateLocalFile(folderId, filename.trim());
     }
   };
 
@@ -281,54 +282,56 @@ export function Sidebar({
           </div>
         ))}
 
-        {/* Local Folder Section */}
+        {/* Local Folders Section */}
         <div className="local-folder-section">
-          {localFolderName ? (
-            <>
+          {localFolders.map(folder => (
+            <div key={folder.id} className="local-folder-item-container mb-4">
               <div className="local-folder-header">
                 <HardDrive size={14} className="folder-icon" />
-                <span className="local-folder-title" title={localFolderName}>{localFolderName}</span>
+                <span className="local-folder-title" title={folder.name}>{folder.name}</span>
                 
-                <button className="folder-action-btn" onClick={handleCreateRootLocalFile} title="Add file in folder root">
+                <button className="folder-action-btn" onClick={() => handleCreateRootLocalFile(folder.id)} title="Add file in folder root">
                   <Plus size={14} />
                 </button>
-                <button className="disconnect-folder-btn" onClick={onDisconnectFolder} title="Disconnect Folder">
+                <button className="disconnect-folder-btn" onClick={() => onDisconnectFolder(folder.id)} title="Disconnect Folder">
                   <LogOut size={14} />
                 </button>
               </div>
 
-              {isFolderLocked ? (
+              {folder.isLocked ? (
                 <div className="local-folder-lock-banner">
                   <p>Folder access is locked</p>
-                  <button className="unlock-folder-btn" onClick={onUnlockFolder}>
+                  <button className="unlock-folder-btn" onClick={() => onUnlockFolder(folder.id)}>
                     Unlock Folder
                   </button>
                 </div>
               ) : (
-                localFolderTree && (
+                folder.tree && (
                   <FolderNode
-                    node={localFolderTree}
+                    folderId={folder.id}
+                    node={folder.tree}
                     activeFileId={activeFileId}
                     onSelectFile={onSelectFile}
-                    onCreateLocalFile={onCreateLocalFile}
+                    onCreateLocalFile={(filename) => onCreateLocalFile(folder.id, filename)}
                     onDeleteLocalFile={onDeleteLocalFile}
                     onRenameLocalFile={onRenameLocalFile}
                     depth={0}
                   />
                 )
               )}
-            </>
-          ) : (
-            <button 
-              className="connect-folder-btn" 
-              onClick={onConnectFolder}
-              disabled={!localFolderSupported}
-              title={!localFolderSupported ? "Local folders are only supported in Chromium browsers (Chrome/Edge)" : "Connect a local folder to edit files directly"}
-            >
-              <HardDrive size={16} /> 
-              {localFolderSupported ? "Connect Local Folder" : "Folders Unsupported"}
-            </button>
-          )}
+            </div>
+          ))}
+
+          {/* Connect Local Folder Button permanently at the bottom */}
+          <button 
+            className="connect-folder-btn" 
+            onClick={onConnectFolder}
+            disabled={!localFolderSupported}
+            title={!localFolderSupported ? "Local folders are only supported in Chromium browsers (Chrome/Edge)" : "Connect a local folder to edit files directly"}
+          >
+            <HardDrive size={16} /> 
+            {localFolderSupported ? "Connect Local Folder" : "Folders Unsupported"}
+          </button>
         </div>
       </div>
     </aside>

@@ -187,18 +187,18 @@ class StorageService {
   }
 
   /**
-   * Retrieves the stored local folder directory handle from settings.
+   * Retrieves the stored list of connected local folders from settings.
    */
-  async getLocalFolderHandle(): Promise<FileSystemDirectoryHandle | null> {
+  async getLocalFolderHandles(): Promise<{ id: string; handle: FileSystemDirectoryHandle }[]> {
     if (!this.db) throw new Error("Database not initialized");
 
-    return new Promise<FileSystemDirectoryHandle | null>((resolve, reject) => {
+    return new Promise<{ id: string; handle: FileSystemDirectoryHandle }[]>((resolve, reject) => {
       const transaction = this.db!.transaction('settings', 'readonly');
       const store = transaction.objectStore('settings');
-      const request = store.get('localFolderHandle');
+      const request = store.get('localFolderHandles');
 
       request.onsuccess = () => {
-        resolve(request.result || null);
+        resolve(request.result || []);
       };
 
       request.onerror = () => {
@@ -208,21 +208,15 @@ class StorageService {
   }
 
   /**
-   * Saves the local folder directory handle.
+   * Saves the list of connected local folders.
    */
-  async setLocalFolderHandle(handle: FileSystemDirectoryHandle | null): Promise<void> {
+  async setLocalFolderHandles(folders: { id: string; handle: FileSystemDirectoryHandle }[]): Promise<void> {
     if (!this.db) throw new Error("Database not initialized");
 
     return new Promise<void>((resolve, reject) => {
       const transaction = this.db!.transaction('settings', 'readwrite');
       const store = transaction.objectStore('settings');
-
-      let request;
-      if (handle === null) {
-        request = store.delete('localFolderHandle');
-      } else {
-        request = store.put(handle, 'localFolderHandle');
-      }
+      const request = store.put(folders, 'localFolderHandles');
 
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);

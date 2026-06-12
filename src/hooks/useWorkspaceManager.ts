@@ -12,6 +12,15 @@ export interface MarkdownFile {
   lastModified: number;
 }
 
+export interface ConnectedFolder {
+  id: string;
+  name: string;
+  handle: FileSystemDirectoryHandle;
+  tree: LocalDirectoryNode | null;
+  flatFiles: LocalFileEntry[];
+  isLocked: boolean;
+}
+
 export const SYSTEM_TUTORIAL_ID = 'system-tutorial';
 
 const tutorialFile: MarkdownFile = {
@@ -44,29 +53,39 @@ export function useWorkspaceManager() {
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Local Folder state
-  const [localFolderHandle, setLocalFolderHandle] = useState<FileSystemDirectoryHandle | null>(null);
-  const [localFolderTree, setLocalFolderTree] = useState<LocalDirectoryNode | null>(null);
-  const [localFiles, setLocalFiles] = useState<LocalFileEntry[]>([]);
-  const [isFolderLocked, setIsFolderLocked] = useState<boolean>(false);
+  // Local Folders state (Multiple)
+  const [localFolders, setLocalFolders] = useState<ConnectedFolder[]>([]);
   const [activeLocalFileContent, setActiveLocalFileContent] = useState<string | null>(null);
 
   const localFolderSupported = localFolderService.isSupported();
 
-  // Helper to traverse and refresh the local file tree
-  const refreshLocalFolder = async (handle: FileSystemDirectoryHandle) => {
+  // Derive global namespaced flat files from all unlocked folders
+  const localFiles = localFolders.reduce<LocalFileEntry[]>((acc, folder) => {
+    if (folder.isLocked) return acc;
+    const namespacedFiles = folder.flatFiles.map(file => ({
+      ...file,
+      // Prefix ID with: local:[folderId]:[relativePath]
+      id: `local:${folder.id}:${file.relativePath}`
+    }));
+    return [...acc, ...namespacedFiles];
+  }, []);
+
+  // Helper to traverse and refresh a local file tree
+  const refreshLocalFolder = async (folderId: string, handle: FileSystemDirectoryHandle) => {
     try {
       const { tree, flatFiles } = await localFolderService.traverseDirectory(handle);
-      setLocalFolderTree(tree);
-      setLocalFiles(flatFiles);
-      setIsFolderLocked(false);
+      setLocalFolders(prev => prev.map(f => 
+        f.id === folderId ? { ...f, tree, flatFiles, isLocked: false } : f
+      ));
     } catch (err) {
-      console.error("Failed to traverse connected local folder:", err);
-      setIsFolderLocked(true);
+      console.error(`Failed to traverse connected local folder "${handle.name}":`, err);
+      setLocalFolders(prev => prev.map(f => 
+        f.id === folderId ? { ...f, isLocked: true } : f
+      ));
     }
   };
 
-  // Initialize DB and load local folder handle on mount
+  // Initialize DB and load local folder handles on mount
   useEffect(() => {
     async function initWorkspace() {
       try {
@@ -76,19 +95,32 @@ export function useWorkspaceManager() {
         const loadedFiles = await storageService.getAllFiles();
         setFiles(loadedFiles);
 
-        // 2. Try to restore local folder handle
-        const storedFolderHandle = await storageService.getLocalFolderHandle();
-        if (storedFolderHandle) {
-          setLocalFolderHandle(storedFolderHandle);
-          
-          // Check permissions (do not request yet to avoid popups on page load)
-          const options = { mode: 'readwrite' as const };
-          const permission = await storedFolderHandle.queryPermission(options);
-          
-          if (permission === 'granted') {
-            await refreshLocalFolder(storedFolderHandle);
-          } else {
-            setIsFolderLocked(true);
+        // 2. Load stored local folder handles
+        const storedFolders = await storageService.getLocalFolderHandles();
+        const initialFolders: ConnectedFolder[] = storedFolders.map(sf => ({
+          id: sf.id,
+          name: sf.handle.name,
+          handle: sf.handle,
+          tree: null,
+          flatFiles: [],
+          isLocked: true // Start as locked on boot; query next
+        }));
+
+        setLocalFolders(initialFolders);
+
+        // Query permissions asynchronously for each folder
+        const options = { mode: 'readwrite' as const };
+        for (const folder of initialFolders) {
+          try {
+            const permission = await folder.handle.queryPermission(options);
+            if (permission === 'granted') {
+              const { tree, flatFiles } = await localFolderService.traverseDirectory(folder.handle);
+              setLocalFolders(prev => prev.map(f => 
+                f.id === folder.id ? { ...f, tree, flatFiles, isLocked: false } : f
+              ));
+            }
+          } catch (err) {
+            console.error(`Failed to verify permission on boot for folder "${folder.name}":`, err);
           }
         }
 
@@ -267,100 +299,136 @@ export function useWorkspaceManager() {
     }
   };
 
-  // --- Local Folder operations ---
+  // --- Local Folders operations ---
 
   const connectLocalFolder = async () => {
     try {
       const handle = await localFolderService.requestFolderHandle();
-      setLocalFolderHandle(handle);
-      await storageService.setLocalFolderHandle(handle);
-      await refreshLocalFolder(handle);
+      
+      // Prevent duplicates by directory name
+      const alreadyConnected = localFolders.some(f => f.name === handle.name);
+      if (alreadyConnected) {
+        alert(`Folder "${handle.name}" is already connected.`);
+        return;
+      }
+
+      const folderId = generateId();
+      const newFolder: ConnectedFolder = {
+        id: folderId,
+        name: handle.name,
+        handle,
+        tree: null,
+        flatFiles: [],
+        isLocked: false
+      };
+
+      setLocalFolders(prev => [...prev, newFolder]);
+
+      // Save list to IndexedDB settings
+      const currentStored = await storageService.getLocalFolderHandles();
+      await storageService.setLocalFolderHandles([...currentStored, { id: folderId, handle }]);
+
+      // Populate file tree
+      await refreshLocalFolder(folderId, handle);
     } catch (err) {
       console.error("Failed to connect local folder:", err);
     }
   };
 
-  const disconnectLocalFolder = async () => {
-    setLocalFolderHandle(null);
-    setLocalFolderTree(null);
-    setLocalFiles([]);
-    setIsFolderLocked(false);
-    await storageService.setLocalFolderHandle(null);
+  const disconnectLocalFolder = async (folderId: string) => {
+    setLocalFolders(prev => prev.filter(f => f.id !== folderId));
     
-    if (activeFileId && activeFileId.startsWith('local:')) {
+    // Save updated handles array in IndexedDB
+    const currentStored = await storageService.getLocalFolderHandles();
+    await storageService.setLocalFolderHandles(currentStored.filter(sf => sf.id !== folderId));
+    
+    // If active file was inside this folder, reset active selection
+    if (activeFileId && activeFileId.startsWith(`local:${folderId}:`)) {
       setActiveFileId(SYSTEM_TUTORIAL_ID);
     }
   };
 
-  const unlockLocalFolder = async () => {
-    if (!localFolderHandle) return;
+  const unlockLocalFolder = async (folderId: string) => {
+    const folder = localFolders.find(f => f.id === folderId);
+    if (!folder) return;
+
     try {
-      const granted = await localFolderService.verifyPermission(localFolderHandle, true);
+      const granted = await localFolderService.verifyPermission(folder.handle, true);
       if (granted) {
-        await refreshLocalFolder(localFolderHandle);
+        await refreshLocalFolder(folderId, folder.handle);
       }
     } catch (err) {
-      console.error("Failed to unlock folder permissions:", err);
+      console.error(`Failed to unlock permissions for folder "${folder.name}":`, err);
     }
   };
 
-  const createLocalFile = async (filename: string) => {
-    if (!localFolderHandle) return;
+  const createLocalFile = async (folderId: string, filename: string) => {
+    const folder = localFolders.find(f => f.id === folderId);
+    if (!folder) return;
+
     try {
-      await localFolderService.createFile(localFolderHandle, filename);
-      await refreshLocalFolder(localFolderHandle);
+      await localFolderService.createFile(folder.handle, filename);
+      await refreshLocalFolder(folderId, folder.handle);
       
       const relativePath = filename.endsWith('.md') || filename.endsWith('.markdown') 
         ? filename 
         : `${filename}.md`;
-      setActiveFileId(`local:${relativePath}`);
+      setActiveFileId(`local:${folderId}:${relativePath}`);
     } catch (err) {
-      console.error("Failed to create local file:", err);
+      console.error(`Failed to create local file in folder "${folder.name}":`, err);
     }
   };
 
   const renameLocalFile = async (id: string, newName: string) => {
-    if (!localFolderHandle || !id.startsWith('local:')) return;
-    const relativePath = id.substring('local:'.length);
+    if (!id.startsWith('local:')) return;
+    const parts = id.split(':');
+    const folderId = parts[1];
+    const relativePath = parts.slice(2).join(':');
+
+    const folder = localFolders.find(f => f.id === folderId);
     const localFile = localFiles.find(f => f.id === id);
-    if (!localFile) return;
+    if (!folder || !localFile) return;
 
     try {
       await localFolderService.renameFile(
         localFile.handle,
-        localFolderHandle,
+        folder.handle,
         relativePath,
         newName
       );
-      await refreshLocalFolder(localFolderHandle);
+      await refreshLocalFolder(folderId, folder.handle);
 
-      // Resolve renamed file path to update active selection
       const pathParts = relativePath.split('/');
       pathParts.pop();
       pathParts.push(newName.endsWith('.md') || newName.endsWith('.markdown') ? newName : `${newName}.md`);
       const newRelativePath = pathParts.join('/');
 
       if (activeFileId === id) {
-        setActiveFileId(`local:${newRelativePath}`);
+        setActiveFileId(`local:${folderId}:${newRelativePath}`);
       }
     } catch (err) {
-      console.error("Failed to rename local file:", err);
+      console.error(`Failed to rename local file in folder "${folder.name}":`, err);
     }
   };
 
   const deleteLocalFile = async (id: string) => {
-    if (!localFolderHandle || !id.startsWith('local:')) return;
-    const relativePath = id.substring('local:'.length);
+    if (!id.startsWith('local:')) return;
+    const parts = id.split(':');
+    const folderId = parts[1];
+    const relativePath = parts.slice(2).join(':');
+
+    const folder = localFolders.find(f => f.id === folderId);
+    if (!folder) return;
 
     try {
-      await localFolderService.deleteFile(localFolderHandle, relativePath);
-      await refreshLocalFolder(localFolderHandle);
+      await localFolderService.deleteFile(folder.handle, relativePath);
+      await refreshLocalFolder(folderId, folder.handle);
 
       if (activeFileId === id) {
         setActiveFileId(SYSTEM_TUTORIAL_ID);
       }
     } catch (err) {
-      console.error("Failed to delete local file:", err);
+      console.error(`Failed to delete local file in folder "${folder.name}":`, err);
     }
   };
 
@@ -376,11 +444,9 @@ export function useWorkspaceManager() {
     renameFile,
     deleteFile,
 
-    // Local Folder bindings
+    // Local Folders bindings
     localFolderSupported,
-    localFolderName: localFolderHandle ? localFolderHandle.name : null,
-    localFolderTree,
-    isFolderLocked,
+    localFolders,
     connectLocalFolder,
     disconnectLocalFolder,
     unlockLocalFolder,
