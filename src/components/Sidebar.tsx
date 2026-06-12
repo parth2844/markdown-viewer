@@ -221,7 +221,7 @@ export function Sidebar({
 
       <div className="sidebar-actions">
         <button className="new-file-btn" onClick={onCreateFile}>
-          <Plus size={16} /> New Cloud File
+          <Plus size={16} /> New File
         </button>
       </div>
 
@@ -322,17 +322,19 @@ export function Sidebar({
             </div>
           ))}
 
-          {/* Connect Local Folder Button permanently at the bottom */}
-          <button 
-            className="connect-folder-btn" 
-            onClick={onConnectFolder}
-            disabled={!localFolderSupported}
-            title={!localFolderSupported ? "Local folders are only supported in Chromium browsers (Chrome/Edge)" : "Connect a local folder to edit files directly"}
-          >
-            <HardDrive size={16} /> 
-            {localFolderSupported ? "Connect Local Folder" : "Folders Unsupported"}
-          </button>
         </div>
+      </div>
+
+      <div className="sidebar-footer">
+        <button 
+          className="connect-folder-btn" 
+          onClick={onConnectFolder}
+          disabled={!localFolderSupported}
+          title={!localFolderSupported ? "Local folders are only supported in Chromium browsers (Chrome/Edge)" : "Connect a local folder to edit files directly"}
+        >
+          <HardDrive size={16} /> 
+          {localFolderSupported ? "Connect Local Folder" : "Folders Unsupported"}
+        </button>
       </div>
     </aside>
   );

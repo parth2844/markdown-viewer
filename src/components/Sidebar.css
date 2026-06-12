@@ -333,3 +333,14 @@
   opacity: 0.9;
 }
 
+/* Sidebar Footer Connect Button Pinned to Bottom */
+.sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.sidebar-footer .connect-folder-btn {
+  margin-top: 0;
+}
+
