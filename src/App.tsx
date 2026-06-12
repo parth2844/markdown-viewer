@@ -7,40 +7,31 @@ import './App.css';
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [sidebarWidth, setSidebarWidth] = useState(250);
-  const [isResizing, setIsResizing] = useState(false);
 
   const startResizing = (mouseDownEvent: React.MouseEvent) => {
     mouseDownEvent.preventDefault();
-    setIsResizing(true);
-  };
+    
+    const startX = mouseDownEvent.clientX;
+    const startWidth = sidebarWidth;
 
-  useEffect(() => {
     const handleMouseMove = (mouseMoveEvent: MouseEvent) => {
-      if (!isResizing) return;
-      const newWidth = mouseMoveEvent.clientX - 12;
-      if (newWidth >= 180 && newWidth <= 500) {
-        setSidebarWidth(newWidth);
-      }
+      const deltaX = mouseMoveEvent.clientX - startX;
+      const newWidth = Math.max(180, Math.min(500, startWidth + deltaX));
+      setSidebarWidth(newWidth);
     };
 
     const handleMouseUp = () => {
-      setIsResizing(false);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
       document.body.style.removeProperty('cursor');
       document.body.style.removeProperty('user-select');
     };
 
-    if (isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
   
   const {
     files,

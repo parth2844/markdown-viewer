@@ -1,12 +1,12 @@
 .sidebar {
-  width: 250px;
+  position: relative;
+  flex-shrink: 0;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   z-index: 10;
-  overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Subtle depth */
 }
 
@@ -17,6 +17,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
 .sidebar-logo {
@@ -338,9 +340,37 @@
   padding: 0.75rem;
   border-top: 1px solid var(--border-color);
   background-color: var(--bg-secondary);
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
 .sidebar-footer .connect-folder-btn {
   margin-top: 0;
+}
+
+/* Sidebar Resizer drag handle styling */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 12px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-resizer::after {
+  content: '';
+  width: 2px;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer:active::after {
+  background-color: var(--accent-color);
 }
 
