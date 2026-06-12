@@ -6,6 +6,41 @@ import './App.css';
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [sidebarWidth, setSidebarWidth] = useState(250);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = (mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (mouseMoveEvent: MouseEvent) => {
+      if (!isResizing) return;
+      const newWidth = mouseMoveEvent.clientX - 12;
+      if (newWidth >= 180 && newWidth <= 500) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.removeProperty('cursor');
+      document.body.style.removeProperty('user-select');
+    };
+
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
   
   const {
     files,
@@ -73,6 +108,10 @@ function App() {
         onCreateLocalFile={createLocalFile}
         onDeleteLocalFile={deleteLocalFile}
         onRenameLocalFile={renameLocalFile}
+
+        // Resize Sidebar Integration
+        width={sidebarWidth}
+        onStartResize={startResizing}
       />
       <EditorWorkspace 
         title={activeFile?.title || 'Untitled Document'}

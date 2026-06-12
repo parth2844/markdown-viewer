@@ -22,6 +22,10 @@ interface SidebarProps {
   onCreateLocalFile: (folderId: string, filename: string) => void;
   onDeleteLocalFile: (id: string) => void;
   onRenameLocalFile: (id: string, newTitle: string) => void;
+
+  // Resize Sidebar Integration
+  width: number;
+  onStartResize: (e: React.MouseEvent) => void;
 }
 
 // Recursive FolderNode component
@@ -181,7 +185,11 @@ export function Sidebar({
   onUnlockFolder,
   onCreateLocalFile,
   onDeleteLocalFile,
-  onRenameLocalFile
+  onRenameLocalFile,
+
+  // Resize Sidebar Integration
+  width,
+  onStartResize
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -208,7 +216,7 @@ export function Sidebar({
   };
 
   return (
-    <aside className="sidebar no-print">
+    <aside className="sidebar no-print" style={{ width: `${width}px` }}>
       <div className="sidebar-header">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 32" height="28">
           <rect x="0" y="0" width="32" height="32" rx="8" fill="var(--accent-color)" />
@@ -336,6 +344,7 @@ export function Sidebar({
           {localFolderSupported ? "Connect Local Folder" : "Folders Unsupported"}
         </button>
       </div>
+      <div className="sidebar-resizer" onMouseDown={onStartResize} />
     </aside>
   );
 }
